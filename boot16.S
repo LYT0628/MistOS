@@ -19,6 +19,7 @@ start16:
 											# 0x20000 is offset of kernel code, now base address start from 0x0000 
 
 # symbel address is located by gcc and address of code is up to us
+# global descriptor table 
 gdt:
 	.quad 0x0000000000000000 # reserved
 	.quad 0x00c09a00000007ff # kernel code segment
