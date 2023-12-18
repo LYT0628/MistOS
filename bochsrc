@@ -1,0 +1,18 @@
+# 给虚拟机分配多少内存
+megs: 32
+
+# 设置BIOS镜像
+romimage: file=$BXSHARE/BIOS-bochs-latest 
+
+# 设置VGA BIOS镜像
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+floppya: 1_44=c.img, status=inserted
+
+boot: floppy
+
+log:bochsout.txt
+
+mouse: enabled=0
+
+keyboard_mapping: enabled=1, map=/usr/share/bochs/keymaps/x11-pc-us.map
