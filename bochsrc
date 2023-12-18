@@ -11,7 +11,7 @@ floppya: 1_44=c.img, status=inserted
 
 boot: floppy
 
-log:bochsout.txt
+log:bochsout.log
 
 mouse: enabled=0
 
