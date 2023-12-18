@@ -33,6 +33,6 @@ jobs:
       run: make
  
     - name: Run in Bochs
-      run: cd .. && make bochs && q
+      run: cd .. && make bochs 
     # - name: Run distcheck
     #   run: make distcheck
