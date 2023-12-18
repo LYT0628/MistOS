@@ -16,7 +16,7 @@ jobs:
 
 #    - name: configure
 #      run: ./configure
-    - name Install nasm:
+    - name: Install nasm
       run: sudo apt install nasm
 	
     - name: Install Git
