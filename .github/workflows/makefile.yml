@@ -25,8 +25,8 @@ jobs:
       run: sudo apt-get install build-essential  xorg-dev libgtk2.0-dev vgabios bximage
       
     - name: Install bochs2.4.5 
-      run: git clone https://github.com/LYT0628/bochs-2.4.5.git && cd bochs-2.4.5 && ./configure   && make && make install 
-	
+      run: git clone https://github.com/LYT0628/bochs-2.4.5.git && cd bochs-2.4.5 && ./configure  && make && make install 
+
     - name: compile
       run: make
  
