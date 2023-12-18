@@ -14,11 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-#    - name: configure
-#      run: ./configure
+
     - name: Install nasm
       run: sudo apt install nasm
-	
+
     - name: Install Git
       run:  sudo apt-get install git
 
