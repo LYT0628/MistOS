@@ -19,4 +19,4 @@ print_boot_msg:
 boot_msg:
   DB "Hello, MistOS!  "
   times 510 - ($ - $$) DB 0
-  DW 0xaa55
+  DW 0xAA55

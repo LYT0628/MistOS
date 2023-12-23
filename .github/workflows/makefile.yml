@@ -14,20 +14,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: update apt
-      run: sudo apt-get update 
+    # - name: update apt
+    #   run: sudo apt-get update 
 
-    - name: Install nasm
-      run: sudo apt install nasm
+    # - name: Install nasm
+    #   run: sudo apt install nasm
 
-    - name: Install Git
-      run:  sudo apt-get install git
+    # - name: Install Git
+    #   run:  sudo apt-get install git
 
-    - name: Install bochs dependencies
-      run: sudo apt-get install build-essential  xorg-dev libgtk2.0-dev vgabios bximage
+    # - name: Install bochs dependencies
+    #   run: sudo apt-get install build-essential  xorg-dev libgtk2.0-dev vgabios bximage
       
-    - name: Install bochs2.4.5 
-      run: git clone https://github.com/LYT0628/bochs-2.4.5.git && cd bochs-2.4.5 && ./configure  && make && sudo make install 
+    # - name: Install bochs2.4.5 
+    #   run: git clone https://github.com/LYT0628/bochs-2.4.5.git && cd bochs-2.4.5 && ./configure  && make && sudo make install 
+
+    - name: RUN setup script
+      run: sudo sh setup.sh
 
     - name: compile
       run: make
