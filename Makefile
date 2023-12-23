@@ -6,7 +6,7 @@ kernel.bin: boot16.asm
 
 
 clean:
-	rm -f *.bin kernel *.out *.log
+	rm -f *.bin kernel *.out *.log *.elf *.o 
 
 write: kernel.bin
 	dd if=kernel.bin of=a.img bs=512 count=1 count=1
