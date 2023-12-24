@@ -1,7 +1,7 @@
 SRC:=boot.asm 
 BIN:=$(subst .asm,.com,$(SRC))
 LOAD_ADDR:=0x100
-
+MOUNT_POINT:=/mnt/floppy/
 # kernel.bin: boot.asm
 $(BIN): $(SRC)
 	nasm -o $@ $<
@@ -23,6 +23,6 @@ dump: kernel.com
 	ndisasm -o $(LOAD_ADDR) $(BIN) > disasm.asm 
 
 mount: $(BIN)
-	mount -o loop pm.img /mnt/floppy/
-	cp $(BIN) /mnt/floppy/ -v 
-	umount /mnt/floppy
+	sudo mount -o loop pm.img $(MOUNT_POINT)
+	sudo cp $(BIN) $(MOUNT_POINT) -v 
+	sudo umount $(MOUNT_POINT)
