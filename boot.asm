@@ -13,6 +13,7 @@
 	LB_DESC_DATA:   DESCRIPTOR    0,      SEG_DATA_LEN-1, DA_DRW    ; Data
 	LB_DESC_STACK:  DESCRIPTOR    0,     TopOfStack, DA_DRWA+DA_32; Stack, 32 位
 	LB_DESC_TEST:   DESCRIPTOR 0500000h,     0ffffh, DA_DRW
+	LB_DESC_LDT:    DESCRIPTOR    0,      LDT_LEN - 1, DA_LDT ; local desriptor table
 LB_DESC_VIDEO:  DESCRIPTOR  0B8000h,     0ffffh, DA_DRW    ; 显存首地址
 ; GDT 结束
 
@@ -27,6 +28,7 @@ GDT_PTR		dw	GDT_LEN - 1	; GDT界限
 	SELECTOR_DATA		equ	LB_DESC_DATA		- LB_GDT
 	SELECTOR_STACK		equ	LB_DESC_STACK	- LB_GDT
 	SELECtoR_TEST		equ	LB_DESC_TEST		- LB_GDT
+	SELECTOR_LDT   equ LB_DESC_LDT      - LB_GDT
 	SELECTOR_VIDEO		equ	LB_DESC_VIDEO	- LB_GDT
 ; END of [SECTION .gdt]
 
@@ -101,6 +103,26 @@ LB_BOOT16:
 	mov	byte [LB_DESC_DATA + 4], al
 	mov	byte [LB_DESC_DATA + 7], ah
 
+	; 初始化LDT 在 GDT 的段描述符
+	xor	eax, eax
+	mov	ax, ds
+	shl	eax, 4
+	add	eax, LB_LDT ; 局部短描述表也是在GDT的一个段
+	mov	word [LB_DESC_LDT + 2], ax
+	shr	eax, 16
+	mov	byte [LB_DESC_LDT + 4], al
+	mov	byte [LB_DESC_LDT + 7], ah
+
+	; 初始化LDT段描述符
+	xor	eax, eax
+	mov	ax, ds
+	shl	eax, 4
+	add	eax, LB_CODEA ; 增加一个局部段
+	mov	word [LB_LDT_DESC_CODEA + 2], ax
+	shr	eax, 16
+	mov	byte [LB_LDT_DESC_CODEA + 4], al
+	mov	byte [LB_LDT_DESC_CODEA + 7], ah
+
 	; 初始化堆栈段描述符
 	xor	eax, eax
 	mov	ax, ds
@@ -117,6 +139,7 @@ LB_BOOT16:
 	shl	eax, 4
 	add	eax, LB_GDT		; eax <- gdt 基地址
 	mov	dword [GDT_PTR + 2], eax	; [GDT_PTR + 2] <- gdt 基地址
+
 
 	; 加载 GDTR
 	lgdt	[GDT_PTR]
@@ -154,7 +177,7 @@ LB_REAL_ENTRY:		; 从保护模式跳回到实模式就到了这里
 	sti			; 开中断
 
 	mov	ax, 4c00h	; `. 4c00h 是DOS的地址
-	int	21h		; /  回到 DOS， 0x21 号中断
+	int	21h		; /   0x21 号中断, 当ax 位4c00h时，退出程序，回到 DOS。
 ; END of [SECTION .s16]
 
 
@@ -171,6 +194,12 @@ LB_SEG_CODE32:
 
 		mov	ax, SELECTOR_STACK
 		mov	ss, ax			; 堆栈段选择子
+
+		; 加载局部段描述符表在GDT的选择子, 加载到 ldtr
+		mov ax, SELECTOR_LDT
+		lldt ax 
+
+		jmp SELECTOR_LDT_CODEA:0
 
 		mov	esp, TopOfStack
 
@@ -323,3 +352,30 @@ LB_GO_BACK_TO_REAL:
 Code16Len	equ	$ - LB_SEG_CODE16
 
 ; END of [SECTION .s16code]
+
+; LDT 
+[SECTION .ldt]
+ALIGN 32
+LB_LDT:
+	LB_LDT_DESC_CODEA: DESCRIPTOR 0, CODEA_LEN -1, DA_C + DA_32 ; 局部任务 A
+LDT_LEN equ $ - LB_LDT
+
+; 局部段表选择子
+SELECTOR_LDT_CODEA equ LB_LDT_DESC_CODEA - LB_LDT + SA_TIL
+
+; 局部任务A段
+[SECTION .la]
+ALIGN 32
+[BITS 32]
+LB_CODEA:
+	mov ax, SELECTOR_VIDEO
+	mov gs, ax 
+
+	mov edi, (80 * 12) * 2 
+	mov ah, 0Ch 
+	mov al, 'L'
+	mov [gs:edi], ax 
+
+	jmp SELECTOR_RET_CODE16:0
+CODEA_LEN equ $ - LB_CODEA
+; End of [SECTION .la]

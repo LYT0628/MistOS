@@ -92,5 +92,5 @@ SA_RPL2		EQU	2	; ┃
 SA_RPL3		EQU	3	; ┛
 
 SA_TIG		EQU	0	; ┓TI
-SA_TIL		EQU	4	; ┛
+SA_TIL		EQU	4	; ┛ 将 选择子 的 TI置位， 表示是 LDT 的选择子
 
