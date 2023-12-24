@@ -11,7 +11,13 @@
 	db	(%1 >> 24) & 0FFh			; 段基址3
 %endmacro ; 共 8 字节
 
-
+%macro Descriptor 3
+	dw	%2 & 0FFFFh				; 段长1
+	dw	%1 & 0FFFFh				; 段基址1
+	db	(%1 >> 16) & 0FFh			; 段基址2
+	dw	((%2 >> 8) & 0F00h) | (%3 & 0F0FFh)	; 属性1 + 段长2 + 属性2
+	db	(%1 >> 24) & 0FFh			; 段基址3
+%endmacro ; 共 8 字节
 
 ; 属性值1(低8位属性，从高位到低位)：
 ; P(1),DPI(2),S(1),TYPE(4)

@@ -1,25 +1,28 @@
-TOOLS = ./tool 
-BOCHS = $(TOOLS)/bochs/bochs-2.3
+SRC:=boot.asm 
+BIN:=$(subst .asm,.com,$(SRC))
+LOAD_ADDR:=0x100
 
 # kernel.bin: boot.asm
-kernel.com: boot.asm 
+$(BIN): $(SRC)
 	nasm -o $@ $<
 
 
-.PRONY: clean write bochs dump mount
+.PHONY: clean write bochs dump mount
 
 
 clean:
-	rm -f *.bin kernel *.out *.log *.elf *.o  *.com
+	rm -f *.bin kernel.com *.out *.log *.elf *.o  *.com
 
 write: kernel.com
-	dd if=kernel.bin of=a.img bs=512 count=1 conv=notrunc
+	dd if=$(BIN) of=a.img bs=512 count=1 conv=notrunc
 
 bochs: kernel.com
 	bochs -f bochsrc
 
 dump: kernel.com
-	ndisasm -o 0x7c00 kernel.bin > diskernel.asm 
+	ndisasm -o $(LOAD_ADDR) $(BIN) > disasm.asm 
 
-mount: kernel.com 
-	sh mount.sh 
+mount: $(BIN)
+	sudo mount -o loop pm.img /mnt/floppy/
+	sudo cp $(BIN) /mnt/floppy/ -v 
+	sudo umount /mnt/floppy
