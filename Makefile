@@ -13,13 +13,13 @@ $(BIN): $(SRC)
 clean:
 	rm -f *.bin kernel.com *.out *.log *.elf *.o  *.com
 
-write: kernel.com
+write: $(BIN)
 	dd if=$(BIN) of=a.img bs=512 count=1 conv=notrunc
 
-bochs: 
+bochs: $(BIN)
 	bochs -f bochsrc
 
-dump: kernel.com
+dump: $(BIN)
 	ndisasm -o $(LOAD_ADDR) $(BIN) > disasm.asm 
 
 mount: $(BIN)
