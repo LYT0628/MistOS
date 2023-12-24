@@ -4,7 +4,7 @@ mov ds, ax
 mov es, ax 
 call print_boot_msg
 jmp $ 
-
+ 
 
 print_boot_msg:
   mov ax, boot_msg
