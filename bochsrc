@@ -5,10 +5,12 @@ megs: 32
 romimage: file=$BXSHARE/BIOS-bochs-latest 
 # 设置VGA BIOS镜像
 vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
-
-floppya: 1_44=a.img, status=inserted
-# 软盘驱动
-boot: floppy
+# A盘
+floppya: 1_44=freedos.img, status=inserted
+# B盘
+floppyb: 1_44=pm.img, status=inserted
+# 软盘a 驱动
+boot: a 
 
 # 日志文件i位置
 log:bochsout.log

@@ -2,7 +2,8 @@
 %include "pm.inc"
 
 ; put code into addr of 07c00H
-org 07c00H 
+; org 07c00H 
+org 0100H
   jmp LB_BOOT16
 
 ; global descriptor table
