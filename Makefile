@@ -23,6 +23,6 @@ dump: kernel.com
 	ndisasm -o $(LOAD_ADDR) $(BIN) > disasm.asm 
 
 mount: $(BIN)
-	sudo mount -o loop pm.img /mnt/floppy/
-	sudo cp $(BIN) /mnt/floppy/ -v 
-	sudo umount /mnt/floppy
+	 mount -o loop pm.img /mnt/floppy/
+  cp $(BIN) /mnt/floppy/ -v 
+	umount /mnt/floppy
