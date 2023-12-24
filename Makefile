@@ -23,6 +23,7 @@ dump: kernel.com
 	ndisasm -o $(LOAD_ADDR) $(BIN) > disasm.asm 
 
 mount: $(BIN)
+	-sudo mkdir $(MOUNT_POINT)
 	sudo mount -o loop pm.img $(MOUNT_POINT)
 	sudo cp $(BIN) $(MOUNT_POINT) -v 
 	sudo umount $(MOUNT_POINT)
