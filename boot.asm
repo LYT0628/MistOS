@@ -17,7 +17,7 @@ GDT_LEN   equ $ - LB_GDT ; Length of GDT. in nasm, we use $ - label to count off
 GDT_PRT   DW  GDT_LEN - 1 ; end address of GDT. in nasm variables is equire to label. GDT_LEN means, the addr of GDT_LEN
           DD  0           ; offset of GDT, now cs is start 0, so here is zero.    
 
-; selector , when LT, AU is zero, Selector is index in GDT
+; selector , when TL, RPL is zero, Selector is index in GDT
 SELECTOR_CODE32 equ LB_DESC_CODE32 - LB_GDT
 SELECTOR_VIDEO  equ LB_DESC_VIDEO  - LB_GDT
 ; end of [SECTION .gdt]

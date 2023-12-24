@@ -5,6 +5,9 @@ megs: 32
 romimage: file=$BXSHARE/BIOS-bochs-latest 
 # 设置VGA BIOS镜像
 vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+
+# floppya: 1_44=a.img, status=inserted
 # A盘
 floppya: 1_44=freedos.img, status=inserted
 # B盘
