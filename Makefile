@@ -16,7 +16,7 @@ clean:
 write: kernel.com
 	dd if=$(BIN) of=a.img bs=512 count=1 conv=notrunc
 
-bochs: kernel.com
+bochs: 
 	bochs -f bochsrc
 
 dump: kernel.com
