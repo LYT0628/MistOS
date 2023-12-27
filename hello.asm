@@ -1,7 +1,11 @@
+
+
+
 org 07c00H
 mov ax, cs
 mov ds, ax
 mov es, ax 
+
 call print_boot_msg
 jmp $ 
  

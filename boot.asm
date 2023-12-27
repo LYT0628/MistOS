@@ -1,20 +1,27 @@
 %include	"pm.inc"	; 常量, 宏, 
 
+
+
 	org	0100h
 	jmp	LB_BOOT16
 
+;
+;
+;
+;
+;
 [SECTION .gdt]
 ; GDT
-	;                            段基址,        段界限 , 属性
-	LB_GDT:         DESCRIPTOR    0,              0, 0         ; 空描述符
-	LB_DESC_NORMAL: DESCRIPTOR    0,         0ffffh, DA_DRW    ; Normal 描述符
-	LB_DESC_BOOT32: DESCRIPTOR    0, SEG_BOOT32_LEN-1, DA_C+DA_32; 非一致代码段, 32
-	LB_DESC_RET_CODE16: DESCRIPTOR    0,         0ffffh, DA_C      ; 非一致代码段, 16
-	LB_DESC_DATA:   DESCRIPTOR    0,      SEG_DATA_LEN-1, DA_DRW    ; Data
-	LB_DESC_STACK:  DESCRIPTOR    0,     TopOfStack, DA_DRWA+DA_32; Stack, 32 位
-	LB_DESC_TEST:   DESCRIPTOR 0500000h,     0ffffh, DA_DRW
-	LB_DESC_LDT:    DESCRIPTOR    0,      LDT_LEN - 1, DA_LDT ; local desriptor table
-LB_DESC_VIDEO:  DESCRIPTOR  0B8000h,     0ffffh, DA_DRW    ; 显存首地址
+	;                                 段基址,              段界限 ,         属性
+	LB_GDT:         Descriptor        0,              0,                  0         ; 空描述符
+	LB_DESC_NORMAL: Descriptor        0,              0FFFFh,             DA_DRW    ; Normal 描述符
+	LB_DESC_BOOT32: Descriptor        0,              SEG_BOOT32_LEN-1,   DA_C+DA_32; 非一致代码段, 32
+	LB_DESC_RET_CODE16: Descriptor    0,              0FFFFh,             DA_C      ; 非一致代码段, 16
+	LB_DESC_DATA:   Descriptor        0,              SEG_DATA_LEN-1,     DA_DRW    ; Data
+	LB_DESC_STACK:  Descriptor        0,              TopOfStack,         DA_DRWA+DA_32; Stack, 32 位
+	LB_DESC_TEST:   Descriptor        0500000h,       0ffffh,             DA_DRW
+	LB_DESC_LDT:    Descriptor        0,              LDT_LEN - 1,        DA_LDT ; local desriptor table
+LB_DESC_VIDEO:  Descriptor          0B8000h,        0ffffh,             DA_DRW    ; 显存首地址
 ; GDT 结束
 
 GDT_LEN		equ	$ - LB_GDT	; GDT长度
@@ -58,8 +65,10 @@ TopOfStack	equ	$ - LB_STACK - 1
 
 ; END of [SECTION .gs]
 
-
-[SECTION .s16]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; boot16段， 用于从16位实模式进入32位u保护模式
+;
+[SECTION .boot16]
 [BITS	16]
 LB_BOOT16:
 	mov	ax, cs
@@ -357,7 +366,7 @@ Code16Len	equ	$ - LB_SEG_CODE16
 [SECTION .ldt]
 ALIGN 32
 LB_LDT:
-	LB_LDT_DESC_CODEA: DESCRIPTOR 0, CODEA_LEN -1, DA_C + DA_32 ; 局部任务 A
+	LB_LDT_DESC_CODEA: Descriptor 0, CODEA_LEN -1, DA_C + DA_32 ; 局部任务 A
 LDT_LEN equ $ - LB_LDT
 
 ; 局部段表选择子
@@ -379,3 +388,4 @@ LB_CODEA:
 	jmp SELECTOR_RET_CODE16:0
 CODEA_LEN equ $ - LB_CODEA
 ; End of [SECTION .la]
+
