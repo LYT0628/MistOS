@@ -62,12 +62,10 @@ LB_STACK:
 	times 512 db 0
 
 TopOfStack	equ	$ - LB_STACK - 1
-
 ; END of [SECTION .gs]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; boot16段， 用于从16位实模式进入32位u保护模式
-;
 [SECTION .boot16]
 [BITS	16]
 LB_BOOT16:
@@ -75,7 +73,7 @@ LB_BOOT16:
 	mov	ds, ax
 	mov	es, ax
 	mov	ss, ax
-	mov	sp, 0100h
+	mov	sp, 0100h; 由Dos加载的起始位置
 
   ; 修改 cs, sp , 供返回实模式使用
 	;通过hack 的方式， 直接修改 长跳转指令的 segment 域，OEAH（0） offset（1-2），seg（3-4）
@@ -91,6 +89,7 @@ LB_BOOT16:
 	shr	eax, 16
 	mov	byte [LB_DESC_RET_CODE16 + 4], al
 	mov	byte [LB_DESC_RET_CODE16 + 7], ah
+
 
 	; 初始化 32 位代码段描述符
 	xor	eax, eax
@@ -192,7 +191,6 @@ LB_REAL_ENTRY:		; 从保护模式跳回到实模式就到了这里
 
 [SECTION .s32]; 32 位代码段. 由实模式跳入.
 [BITS	32]
-
 LB_SEG_CODE32:
 		mov	ax, SELECTOR_DATA
 		mov	ds, ax			; 数据段选择子
