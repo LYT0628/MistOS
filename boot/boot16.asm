@@ -58,7 +58,7 @@ LABEL_BEGIN:
 
 	mov dh, 0 ;重置磁头
 	add ch, 1 
-	cmp ch, 10 ; 读取10个柱面
+	cmp ch, 3 ; 读取10个柱面
 	jb .readLoop
 ;boot32读取结束;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 64位a代码得在32位模式才可以加载
