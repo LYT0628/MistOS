@@ -48,7 +48,7 @@ vhd:	$(PACKAGE)
 # 将目标文件写进软盘, 并启动 bochs
 #注意bs选项，在内核增大之后也要相应的把它调大
 msr: $(PACKAGE) 
-	dd if=$(PACKAGE) of=$(BOCHS_IMG_MSR) bs=1000 count=1 conv=notrunc
+	dd if=$(PACKAGE) of=$(BOCHS_IMG_MSR) bs=1000000000 count=1 conv=notrunc
 	bochs -f $(BOCHS_CONFIG_MSR)
 
 dump: $(ASMS)

@@ -26,7 +26,8 @@ LABEL_BEGIN:
 
 
 
-;软盘驱动,读取boot32内核代码;;;;;;;;;;;;;;;;;;;;;
+;软盘驱动,读取boot32内核代码;;;;;;;;;;;;;;;;;;;;;;
+;2 号扇区到 525 号扇区，我们留一点空余， 把 一直到499 号扇区(包括)，都留给boot32
 	mov ax, BOOT32_LOGIC_ADDR
 	mov es, ax 
 
@@ -34,13 +35,33 @@ LABEL_BEGIN:
 	mov dh, 0 ; 0磁头
 	mov cl, 2 ; 扇区2
 
+.readLoop:
 	mov ah, 0x02 ; 读盘操作
 	mov al, 1 ;一个扇区
 	mov bx, 0
 	mov dl, 0x00 ;A驱动器
 	int 0x13 ; bios中断
-;boot32读取结束;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+	mov ax, es  ; 读取地址后移0x200,即512字节
+	add ax, 0x0020
+	mov es, ax 
+
+	add cl, 1
+
+	cmp cl, 18 ; 磁头的扇区是否读完了
+	jbe .readLoop ; 没读完就继续读
+
+	mov cl, 1 ; 重置扇区 
+	add dh, 1 
+	cmp dh, 2; 柱面的磁头是否读完了
+	jb .readLoop ; 没读完就继续读
+
+	mov dh, 0 ;重置磁头
+	add ch, 1 
+	cmp ch, 10 ; 读取10个柱面
+	jb .readLoop
+;boot32读取结束;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; 64位a代码得在32位模式才可以加载
 
 
 ; 注意，跳到保护模式后不能 mov cs段寄存器了
