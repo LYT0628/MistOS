@@ -2,98 +2,104 @@
 %include	"pm.inc"	; 常量, 宏
 %include 	"boot.inc"
 
+; BOOT32_LBA  						EQU 00002h 				;boot32在磁盘中的逻辑扇区号
+; BOOT32_LOGIC_ADDR   		EQU 01000h 			;boot32在内存中的逻辑地址 
+; BOOT32_PHYSICAL_ADDR   	EQU 10000h  		;boot32在内存中的物理地址
+; BOOT32_LIMIT 						EQU FFFFFh     ;boot32的段界限
 
+; HEADER64_LOGIC_ADDR     EQU 100000h    ;boot64在内存中的逻辑地址
 
-[SECTION .boot16 vstart=0x7c00]
+[SECTION boot16 vstart=7c00h]
 [BITS	16]
-LABEL_BEGIN:
-	mov	ax, cs ; cs初始是0
-	mov	ds, ax
-	mov	es, ax
-	mov	ss, ax
+SEG_BOOT16:
+	mov	AX, CS ; cs初始是0
+	mov	DS, AX
+	mov	ES, AX
+	mov	SS, AX
 
+	call readBoot32
 
+	cli	;关中断
 
-	lgdt	[GdtPtr]	; 加载 GDTR
+	lgdt	[GDTR]	;加载 GDTR
 
+	;打开地址线A20
+	in	AL, 92h
+	or	AL, 00000010b
+	out	92h, AL
 
-	cli	; 关中断
-
-	; 打开地址线A20
-	in	al, 92h
-	or	al, 00000010b
-	out	92h, al
-
-
-
-;软盘驱动,读取boot32内核代码;;;;;;;;;;;;;;;;;;;;;;
-;2 号扇区到 525 号扇区，我们留一点空余， 把 一直到499 号扇区(包括)，都留给boot32
-	mov ax, BOOT32_LOGIC_ADDR
-	mov es, ax 
-
-	mov ch, 0 ; 0柱面
-	mov dh, 0 ; 0磁头
-	mov cl, 2 ; 扇区2
-
-.readLoop:
-	mov ah, 0x02 ; 读盘操作
-	mov al, 1 ;一个扇区
-	mov bx, 0
-	mov dl, 0x00 ;A驱动器
-	int 0x13 ; bios中断
-
-	mov ax, es  ; 读取地址后移0x200,即512字节
-	add ax, 0x0020
-	mov es, ax 
-
-	add cl, 1
-
-	cmp cl, 18 ; 磁头的扇区是否读完了
-	jbe .readLoop ; 没读完就继续读
-
-	mov cl, 1 ; 重置扇区 
-	add dh, 1 
-	cmp dh, 2; 柱面的磁头是否读完了
-	jb .readLoop ; 没读完就继续读
-
-	mov dh, 0 ;重置磁头
-	add ch, 1 
-	cmp ch, 3 ; 读取10个柱面
-	jb .readLoop
-;boot32读取结束;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 64位a代码得在32位模式才可以加载
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 注意，跳到保护模式后不能 mov cs段寄存器了
-	mov	eax, cr0
-	or	eax, 1
-	mov	cr0, eax
+	mov	EAX, cr0
+	or	EAX, 1
+	mov	cr0, EAX
 ; 真正进入保护模式
-	jmp	dword SelectorCode32: BOOT32_PHYSICAL_ADDR
+	jmp	dword SELECTOR_BOOT32: BOOT32_PHYSICAL_ADDR
 ; END of [SECTION .boot16]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------------------------------------------
+;软盘驱动,读取boot32内核代码
+;-----------------------------------------------------
+readBoot32:
+	mov AX, BOOT32_LOGIC_ADDR ; 加载到 0x10000 的位置
+	mov ES, AX  
+
+	mov CH, 0 ;0柱面
+	mov DH, 0 ;0磁头
+	mov CL, 2 ;扇区2
+
+loop_read_sector:
+	mov AH, 02h ;读盘操作
+	mov AL, 1 ;一个扇区
+	mov BX, 0 
+	mov DL, 00h ;A驱动器
+	int 13h ; bios磁盘中断
+
+	mov AX, ES  ; 读取地址后移0x0200,即512字节
+	add AX, 0020h
+	mov ES, AX 
+
+	add CL, 1 ;读取下一个扇区 
+
+	cmp CL, 18 ; 磁头的扇区是否读完了
+	jbe loop_read_sector;
+
+	mov CL, 1 ;重置扇区 
+	add DH, 1 ; 读取下一个磁头
+
+	cmp DH, 2; 柱面的磁头是否读完了
+	jb loop_read_sector
+
+	mov DH, 0 ;重置磁头
+	add CH, 1 ;读取下一个柱面
+
+	cmp CH, 3 ; 一共读取3个柱面
+	jb loop_read_sector
+
+	ret 
+;boot32读取结束---------------------------------------------
+
+;----------------------------------------------------------------------------------------------
 ; GDT
+;----------------------------------------------------------------------------------------------
 ;                              段基址,       段界限     , 属性
-LABEL_GDT:	   Descriptor       0,                	 0, 						0           	 ; 空描述符
-LABEL_DESC_CODE32: Descriptor   0, 				BOOT32_LIMIT, 						DA_C + DA_32	 ; 内核代码段
-LABEL_DESC_DATA: Descriptor     0,     		BOOT32_LIMIT,   	 				DA_DRW + DA_32 ; 内核数据段
+GDT:	   Descriptor       0,                	 0, 						0           	 ; 空描述符
+DESC_CODE32: Descriptor   0, 				BOOT32_LIMIT, 						DA_C + DA_32	 ; 内核代码段
+DESC_DATA: Descriptor     0,     		BOOT32_LIMIT,   	 				DA_DRW + DA_32 ; 内核数据段
 ; GDT 结束
 
-GdtLen		EQU	$ - LABEL_GDT	; GDT长度
-GdtPtr		DW	GdtLen - 1	; GDT界限
-		      DD	LABEL_GDT		; GDT基地址
+GDT_LEN		EQU	$ - GDT	; GDT长度
+GDTR		DW	GDT_LEN - 1	; GDT界限
+		    DD	GDT		; GDT基地址
 
 ; GDT 选择子
-SelectorCode32		EQU	LABEL_DESC_CODE32	- LABEL_GDT
-SelectorData      EQU LABEL_DESC_DATA - LABEL_GDT
+SELECTOR_BOOT32		EQU	DESC_CODE32	- GDT
+SELECTOR_DATA      EQU DESC_DATA - GDT
+;end of GDT
+;-------------------------------------------------------------------
 ; END of [SECTION .gdt]
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;--------------------------------------------------------------------
 
-
-times 510 - ($ - $$) DB 0
+TIMES 510 - ($ - $$) DB 0
 DW 0xAA55 

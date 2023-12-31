@@ -30,4 +30,17 @@ X86 OS
 - u `<start_addr>` <end_addr> : 反汇编一段内存
 - `trace on ` : 反汇编执行的每一条指令
 
+
+## 编码规范
+
+- 主逻辑放到上面，数据放到下面
+- 常量命名EQU， 所有字母大写，下划线隔开， NASM_COMPILER
+- 描述符命名，DESC_VIDEO
+- 选择子命名， SELECTOR_VIDEO
+- 循环标签命名，loop_read_sector
+- 段名（SECTION）boot32, 它的第一个位置必须放标签，SEG_BOOT32
+- 例程命名,小驼峰，readHardDisk0, print, readFloppy
+- 结构宏命名，Descriptor， PageItem
+- 结构实体，gdtr, 结构实体和地址标签的区别在于使用时是否使用【】访问内存
+
 ## Qemu Note
