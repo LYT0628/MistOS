@@ -10,7 +10,7 @@ libgtk2.0-dev vgabios bximage
 # install bochs
 git clone https://github.com/LYT0628/bochs-2.4.5.git \
     && cd bochs-2.4.5 \
-    && ./configure --enable-debugger --enable-disasm  \
+    && ./configure --enable-debugger --enable-disasm  --enable-x86-64--enable-x86-debugger --enable-a20-pin\
     && make && sudo make install 
 
 # install vhd write

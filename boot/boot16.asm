@@ -17,7 +17,9 @@ SEG_BOOT16:
 	mov	ES, AX
 	mov	SS, AX
 
+	; 读入内核代码
 	call readBoot32
+	call readHeader64
 
 	cli	;关中断
 
@@ -49,7 +51,7 @@ readBoot32:
 	mov DH, 0 ;0磁头
 	mov CL, 2 ;扇区2
 
-loop_read_sector:
+loop_read_boot32:
 	mov AH, 02h ;读盘操作
 	mov AL, 1 ;一个扇区
 	mov BX, 0 
@@ -63,23 +65,64 @@ loop_read_sector:
 	add CL, 1 ;读取下一个扇区 
 
 	cmp CL, 18 ; 磁头的扇区是否读完了
-	jbe loop_read_sector;
+	jbe loop_read_boot32;
 
 	mov CL, 1 ;重置扇区 
 	add DH, 1 ; 读取下一个磁头
 
 	cmp DH, 2; 柱面的磁头是否读完了
-	jb loop_read_sector
+	jb loop_read_boot32
 
 	mov DH, 0 ;重置磁头
 	add CH, 1 ;读取下一个柱面
 
-	cmp CH, 3 ; 一共读取3个柱面
-	jb loop_read_sector
+	cmp CH, 1 ; 一共读取1个柱面
+	jb loop_read_boot32
 
 	ret 
 ;boot32读取结束---------------------------------------------
 
+;------------------------------------------------
+;软盘驱动,读取header64内核代码
+;-----------------------------------------------------
+readHeader64:
+	mov AX, HEADER64_LOGIC_ADDR ; 加载到 0x0020000 的位置
+	mov ES, AX  
+
+	mov CH, 0 ;0柱面
+	mov DH, 0 ;0磁头
+	mov CL, 4 ;扇区4
+
+loop_read_header64:
+	mov AH, 02h ;读盘操作
+	mov AL, 1 ;一个扇区
+	mov BX, 0 
+	mov DL, 00h ;A驱动器
+	int 13h ; bios磁盘中断
+
+	mov AX, ES  ; 读取地址后移0x0200,即512字节
+	add AX, 0020h
+	mov ES, AX 
+
+	add CL, 1 ;读取下一个扇区 
+
+	cmp CL, 18 ; 磁头的扇区是否读完了
+	jbe loop_read_header64;
+
+	mov CL, 1 ;重置扇区 
+	add DH, 1 ; 读取下一个磁头
+
+	cmp DH, 2; 柱面的磁头是否读完了
+	jb loop_read_header64
+
+	mov DH, 0 ;重置磁头
+	add CH, 1 ;读取下一个柱面
+
+	cmp CH, 1 ; 一共读取1个柱面
+	jb loop_read_header64
+
+	ret 
+;header64读取结束---------------------------------------------
 ;----------------------------------------------------------------------------------------------
 ; GDT
 ;----------------------------------------------------------------------------------------------

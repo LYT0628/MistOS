@@ -21,7 +21,7 @@ clean:
 dump: boot16.bin boot32.bin system.bin
 	ndisasm -o 0x7c00 boot16.bin > dis_boot16.asm
 	ndisasm -o 0x10000 boot32.bin > dis_boot32.asm
-	ndisasm -o 0x100000 system.bin > dis_header64.asm
+	ndisasm -o 0x20000 system.bin > dis_header64.asm
 
 
 

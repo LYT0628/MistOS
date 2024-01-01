@@ -24,7 +24,7 @@ inf.close()
 # 读取 system.bin
 inf = open(op.join(basedir, '../boot/system.bin'), 'rb')
 content = inf.read()
-loc = outf.seek(512 * 2 * 18 * 3 , 0) # 加载在第4个柱面的位置
+loc = outf.seek(512 * 3 , 0) # 第4个扇面 
 n = outf.write(content)
 print('向 地址',loc , '加载',n,'个字节')
 inf.close()

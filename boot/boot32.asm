@@ -3,8 +3,8 @@
 %include 	"boot.inc"
 
 
-PageDirBase		equ	0x20000	; 页目录开始地址: 2M
-PageTblBase		equ	0x20100	; 页表开始地址: 2M+4K
+PageDirBase		equ	0x200000	; 页目录开始地址: 2M
+PageTblBase		equ	0x201000	; 页表开始地址: 2M+4K
 
 PM4		        EQU	0x20000	; 四级页表1个
 PM3		        EQU	0x21000	; 三级页表1个
@@ -12,18 +12,52 @@ PM2		        EQU	0x22000	; 二级页表1个
 PM1		        EQU	0x23000	; 一级页表 512 个
 PM3_IDENTITY  EQU 0x33000 ; 恒等映射的三级页表
 PM2_IDENTITY  EQU 0x34000 ; 恒等映射的二级页表
-
+; 我使用page指令，发现 0x0 的线性地址映射到 0x34000 的物理页， 说明 pm4-> pm3-> pm2 ,pm3被认为是物理页
+; 即只有两级页表 
 [SECTION .boot32 vstart=0x10000]
 [BITS 32]
   mov ax, SELECTOR_DATA
   mov ds, ax 
   mov es, ax 
+
+  ; call readHeader64 ; 读入内核代码段
+
   lgdt [GDTR] ;为64位模式准备新的段描述符
 
-  call setupPaging
+  ; call setupPaging   1
+  call SetupPagingTmp ; 没办法了, 现在暂时先使用2级分页吧, 现在bohcs默认用二级分页，等找到办法开启4级分页再切换回来
 
 
-  jmp $
+; 使能PAE 2
+  ; mov eax, cr4
+  ; bts eax, 5 
+  ; mov cr4, eax
+
+
+; 使能 64位模式
+; msr EFER
+  mov  ecx, 0xC000_0080
+  rdmsr
+  or eax, 1000_0000b ; 使能64位模式 
+  or eax, 0000_0001b ; 使能 syscall
+  wrmsr 
+
+
+; 设置cr3指向四级页表(根页表) 3
+  ; mov eax, PM4
+  ; mov cr3, eax
+
+
+; 使能分页..默认就是启动分页的 ？
+  mov eax, cr0 
+  bts eax, 31
+  mov cr0, eax 
+
+
+
+  ; jmp SELECTOR_SYSTEM: 0x0100000
+  jmp SELECTOR_SYSTEM: HEADER64_PHYSICAL_ADDR
+; 别忘记粒度了，4KB的粒度，段长空间才是4GB
 
 ;启动设置页表--------------------------------------------------------------------------
 setupPaging:
@@ -65,7 +99,7 @@ pm3_init:
   ; 第512 项填充 0 
   mov EAX, 0 
   stosd
-  
+
   ; 初始化2级页表
   mov EDI, PM2 
 	mov	ECX, 512 
@@ -77,37 +111,67 @@ pm2_init:
 
   ; 初始化1级页表
   mov EDI, PM1 ; 
-	mov	ECX, 32 ; 先做好前 32 个一级页表， 现在还不知道物理空间到底有多大 
+	mov	ECX, 32 * 512  ; 先做好前 32 个一级页表， 现在还不知道物理空间到底有多大 
   mov EAX, 0 | PG_P | PG_RWW ; 指向整个物理地址
 pm1_init:
 	stosd ; EAX -> ES:EDI
   add EAX, 0x1000 ; 指向下一个一级页表项
 	loop	pm1_init
+  
+  ; 初始化恒等映射三级页表
+  mov	EDI, PM3_IDENTITY  ; 目的地址 EDI
+  ; 指向恒等映射的二级页表
+  mov	EAX, PM2_IDENTITY | PG_P | PG_RWW
+  stosd
+  add EAX, 0x1000 ;  每个表项4K大小 
+
+; 填充511个空项
+	mov	ECX, 511
+  xor EAX, EAX
+pm3_identity_init:
+	stosd ; EAX -> ES:EDI
+	loop	pm3_identity_init
 
 
+  ; 初始化恒等映射二级页表
+  mov	EDI, PM2_IDENTITY  ; 目的地址 EDI
+  ; 复用内核映射的第一个一级页表
+  mov	EAX, PM1 | PG_P | PG_RWW
+  stosd
+  add EAX, 0x1000 ;  每个表项4K大小 
+
+; 填充511个空项
+	mov	ECX, 511
+  xor EAX, EAX
+pm2_identity_init:
+	stosd ; EAX -> ES:EDI
+	loop	pm2_identity_init
+
+
+	ret
+;-------------------------------------
+
+; 启动分页机制 --------------------------------------------------------------
+SetupPagingTmp:
 	; 为简化处理, 所有线性地址对应相等的物理地址.
-  jmp $ 
+
 	; 首先初始化页目录
-	mov	ax, SELECTOR_DATA
-	mov	es, ax  
-  mov	edi, PageDirBase  ; 目的地址 EDI
-
+	mov	ax, SELECTOR_PAGE_DIR	; 此段首地址为 PageDirBase
+	mov	es, ax
 	mov	ecx, 1024		; 共 1K 个表项
-
-	xor	eax, eax  ; 值
+	xor	edi, edi 
+	xor	eax, eax
 	mov	eax, PageTblBase | PG_P  | PG_USU | PG_RWW
 .1:
-	stosd ; EAX -> ES:EDI
-	add	eax, 4096		; 每一页的地址是4096
+	stosd
+	add	eax, 4096		; 为了简化, 所有页表在内存中是连续的.
 	loop	.1
 
 	; 再初始化所有页表 (1K 个, 4M 内存空间)
-	mov	ax, SELECTOR_DATA
+	mov	ax, SELECTOR_PAGE_TBL	; 此段首地址为 PageTblBase
 	mov	es, ax
-  mov	edi, PageTblBase
-
 	mov	ecx, 1024 * 1024	; 共 1M 个页表项, 也即有 1M 个页
-	
+	xor	edi, edi
 	xor	eax, eax
 	mov	eax, PG_P  | PG_USU | PG_RWW
 .2:
@@ -117,15 +181,18 @@ pm1_init:
 
 	mov	eax, PageDirBase
 	mov	cr3, eax
+	
 	mov	eax, cr0
 	or	eax, 80000000h
 	mov	cr0, eax
+	
 	jmp	short .3
 .3:
 	nop
 
 	ret
-;分页机制启动完毕 ----------------------------------------------------------
+; 分页机制启动完毕 ----------------------------------------------------------
+
 ;-----------------------------------------
 ;COMMON: jmp $
 ;--------------------------------------------
@@ -141,59 +208,7 @@ switch_to_graph_mode:
 ;   mov ax, 0
 ;   mov ss, 0
 ;   ret 
-; ;;;;;;;;;;;;;;;;;;;;;;;;为二级页表赋值
-;   mov edi, 0x22000, 
-;   mov eax, 0x23000 | PA_P | PA_RW 
-
-; .pm2_init:
-;   mov [edi], eax
-;   add eax, 0x1000
-;   add edi, 8 ; 每次移动64位，一个表项
-
-
-;   cmp edi, 0x22000 + 31 * 8
-;   jbe .pm2_init
-; ; 二级页表初始化结束
-; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; ;;;;;;;;;;;;;;;;;;;;;;;;;;;初始化一级页表
-;   mov edi, 0x23000, 
-;   mov eax, 0x0 | PA_P | PA_RW 
-
-; .pm1_init:
-;   mov [edi], eax
-;   add eax, 0x1000
-;   add edi, 8 ; 每次移动64位，一个表项
-
-;   cmp edi, 0x23000 + 512* 32 * 8 -8 
-;   jbe .pm1_init
-; ; 一级页表初始化结束
-; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-; ; 使能PAE
-;   mov eax, cr4
-;   or eax, 1_0000b 
-;   mov cr4, eax 
-
-; ; 设置cr3指向四级页表(根页表)
-;   mov eax, 0x20000
-;   mov cr3, eax
-
-; ; 使能 64位模式
-; ;;; msr EFER
-;   mov  ecx, 0xC000_0080
-;   rdmsr
-;   or eax, 1000_0000b ; 使能64位模式 
-;   or eax, 0000_0001b ; 使能 syscall
-;   wrmsr 
-
-; ; 开启分页
-;   mov eax, cr0
-;   bts eax, 31
-;   mov cr0, eax 
-
-
-;   jmp SELECTOR_SYSTEM: 0x100000
+;--------------------------------------------
 
 
 
@@ -202,8 +217,10 @@ switch_to_graph_mode:
 ; GDT 需要重新设置， 64位模式下段描述符只有 L, P, DPL, S, TYPE 有作用
 ;                              段基址,       段界限     , 属性
 GDT:	   Descriptor       0,                	 0, 						0           	 ; 空描述符
-DESC_CODE64: Descriptor   0, 				           0, 						DA_L + DA_CR ; 内核代码段，可读，长模式，存在，特权级0
-DESC_DATA: Descriptor     0,     		           BOOT32_LIMIT,   	 				DA_DRW  ; 内核数据段
+DESC_CODE64: Descriptor   0, 				           0xFF_FF_FF_FF, 			DA_L | DA_CR | DA_G ; 内核代码段，可读，长模式，存在，特权级0
+DESC_DATA: Descriptor     0,     		           0xFF_FF_FF_FF,   	 	DA_DRW | DA_G ; 内核数据段
+DESC_PAGE_DIR: Descriptor PageDirBase, 4095, DA_DRW                   ; 二级页
+DESC_PAGE_TBL: Descriptor PageTblBase, 1023, DA_DRW | DA_G   ; 一级页
 ; GDT 结束
 
 GDT_LEN		equ	$ - GDT	; GDT长度
@@ -213,6 +230,8 @@ GDTR		  dw	GDT_LEN - 1	; GDT界限
 ; GDT 选择子
 SELECTOR_SYSTEM		  EQU	DESC_CODE64	- GDT
 SELECTOR_DATA       EQU DESC_DATA - GDT
+SELECTOR_PAGE_DIR		equ	DESC_PAGE_DIR	- GDT
+SELECTOR_PAGE_TBL		equ	DESC_PAGE_TBL	- GDT
 ; END of [SECTION .gdt]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

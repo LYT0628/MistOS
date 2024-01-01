@@ -1,4 +1,5 @@
 
-[SECTION .header64 vstart=0x100000]
+[SECTION .header64 vstart=0x20000]
 [BITS 64]
-jmp $
+loop_fin:
+  hlt 
