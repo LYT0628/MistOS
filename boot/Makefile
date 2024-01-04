@@ -1,6 +1,6 @@
 ROOT_DIR:=..
 
-everything: boot16.bin boot32.bin system.bin
+everything: boot16.bin boot32.bin 
 	@echo $@
 
 boot16.bin: boot16.asm 
@@ -9,19 +9,17 @@ boot16.bin: boot16.asm
 boot32.bin: boot32.asm
 	nasm -o $@ $^
 
-system.bin: header64.asm 
-	nasm -o $@ $^
+
 
 .PHONY: clean dump everything
 
 clean:
-	-rm -f *.bin
+	-rm -f *.bin *.o
 	-rm -f dis_*.asm
 
 dump: boot16.bin boot32.bin system.bin
 	ndisasm -o 0x7c00 boot16.bin > dis_boot16.asm
 	ndisasm -o 0x10000 boot32.bin > dis_boot32.asm
-	ndisasm -o 0x20000 system.bin > dis_header64.asm
 
 
 

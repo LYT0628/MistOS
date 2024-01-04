@@ -2,13 +2,6 @@
 %include	"pm.inc"	; 常量, 宏
 %include 	"boot.inc"
 
-; BOOT32_LBA  						EQU 00002h 				;boot32在磁盘中的逻辑扇区号
-; BOOT32_LOGIC_ADDR   		EQU 01000h 			;boot32在内存中的逻辑地址 
-; BOOT32_PHYSICAL_ADDR   	EQU 10000h  		;boot32在内存中的物理地址
-; BOOT32_LIMIT 						EQU FFFFFh     ;boot32的段界限
-
-; HEADER64_LOGIC_ADDR     EQU 100000h    ;boot64在内存中的逻辑地址
-
 [SECTION boot16 vstart=7c00h]
 [BITS	16]
 SEG_BOOT16:
@@ -18,8 +11,10 @@ SEG_BOOT16:
 	mov	SS, AX
 
 	; 读入内核代码
+	call printBootMsg
 	call readBoot32
 	call readHeader64
+	call switch2GraphMode
 
 	cli	;关中断
 
@@ -30,15 +25,15 @@ SEG_BOOT16:
 	or	AL, 00000010b
 	out	92h, AL
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------------------------------------------------------------------------
 ; 注意，跳到保护模式后不能 mov cs段寄存器了
 	mov	EAX, cr0
 	or	EAX, 1
 	mov	cr0, EAX
 ; 真正进入保护模式
 	jmp	dword SELECTOR_BOOT32: BOOT32_PHYSICAL_ADDR
-; END of [SECTION .boot16]
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; END of [SECTION boot16]
+;-------------------------------------------
 
 ;------------------------------------------------
 ;软盘驱动,读取boot32内核代码
@@ -81,12 +76,11 @@ loop_read_boot32:
 
 	ret 
 ;boot32读取结束---------------------------------------------
-
 ;------------------------------------------------
 ;软盘驱动,读取header64内核代码
 ;-----------------------------------------------------
 readHeader64:
-	mov AX, HEADER64_LOGIC_ADDR ; 加载到 0x0020000 的位置
+	mov AX, HEADER64_LOGIC_ADDR ; 加载到 0x020000 的位置
 	mov ES, AX  
 
 	mov CH, 0 ;0柱面
@@ -123,6 +117,36 @@ loop_read_header64:
 
 	ret 
 ;header64读取结束---------------------------------------------
+;-------------------------------------------------------------
+switch2GraphMode:
+  mov AL, 0x13 ;VGA显卡320x320真彩色
+  mov AH, 0x00 
+  int 10
+	mov byte [VMODES], 8 
+	mov word [SCRNX], 320
+	mov word [SCRNY], 200
+	mov DWORD [VRAM_GRAPH], 0x000a_0000
+
+	mov AH, 0x02
+	int 0x16
+	mov [LEDS], AL
+
+  ret 
+;End of Switch2GraphMode----------------------------------------------------------
+;--------------------------------------------------------------
+printBootMsg:
+  mov ax, boot_msg
+  mov bp, ax 
+  mov cx, 16
+  mov ax, 01301H
+  mov bx, 000cH
+  mov dl, 0
+  int 10H
+  ret 
+
+boot_msg:
+  DB "Hello, MistOS!  "
+;End of printBootMsg----------------------------------------------------------
 ;----------------------------------------------------------------------------------------------
 ; GDT
 ;----------------------------------------------------------------------------------------------
@@ -133,8 +157,8 @@ DESC_DATA: Descriptor     0,     		BOOT32_LIMIT,   	 				DA_DRW + DA_32 ; 内核
 ; GDT 结束
 
 GDT_LEN		EQU	$ - GDT	; GDT长度
-GDTR		DW	GDT_LEN - 1	; GDT界限
-		    DD	GDT		; GDT基地址
+GDTR			DW	GDT_LEN - 1	; GDT界限
+		    	DD	GDT		; GDT基地址
 
 ; GDT 选择子
 SELECTOR_BOOT32		EQU	DESC_CODE32	- GDT

@@ -1,6 +1,7 @@
 
 ROOT_DIR:=.
 BOOT_DIR:=$(ROOT_DIR)/boot
+INIT_DIR:=$(ROOT_DIR)/init
 BUILD_DIR:=$(ROOT_DIR)/build
 TOOLS_DIR:=$(ROOT_DIR)/tools
 PACKAGE=$(ROOT_DIR)/kernel.bin
@@ -37,6 +38,7 @@ $(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS)
 
 clean:
 	cd $(BOOT_DIR) && make clean
+	cd $(INIT_DIR) && make clean
 	-rm -f *.bin *.com  \
 			  *.out *.elf *.o \
 				*.log
