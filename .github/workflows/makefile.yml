@@ -35,10 +35,10 @@ jobs:
     - name: compile
       run: make
     
-    - name: mount DOS
-      run: sudo make mount
+    # - name: mount DOS
+    #   run: sudo make mount
 
     - name: Run in Bochs
-      run:  make bochs
+      run:  make msr
     # - name: Run distcheck
     #   run: make distcheck

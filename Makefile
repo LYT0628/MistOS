@@ -29,7 +29,8 @@ BOCHS_IMG_MSR:=$(TOOL_BOCHS)/msr.img
 
 
 $(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS)
-	cd $(BOOT_DIR)/ && make 
+	cd $(BOOT_DIR)/ && make
+	cd $(INIT_DIR)/ && make 
 	$(PYTHON) $(BUILD_DIR)/build.py
 
 
@@ -55,7 +56,7 @@ msr: $(PACKAGE)
 
 dump: $(ASMS)
 	cd $(BOOT_DIR) && make dump
-
+	cd $(INIT_DIR) && make dump
 
 # ##################################################################################################
 # # make 

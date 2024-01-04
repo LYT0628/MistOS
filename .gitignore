@@ -57,4 +57,14 @@ dkms.conf
 # 日志文件
 *.log
 
+# 工具文件夹
 tools
+
+# 反汇编文件
+dis_*.asm
+dis_*.S
+
+# 可执行文件
+*.elf
+*.out 
+

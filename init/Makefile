@@ -26,7 +26,7 @@ main.o: main.c
 
 clean:
 	-rm *.o *-bin *.elf *.bin 
-
+	-rm dis_*.asm dis_*.S
 dump:
 	objdump -d  sys.elf > dis_sys.S
 	ndisasm -o 0x100000 sys.bin > dis_sys.asm
