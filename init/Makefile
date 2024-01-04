@@ -1,16 +1,17 @@
 ROOT_DIR:=..
 BOOT_DIR:=$(ROOT_DIR)/boot
 
+INCLUDE_DIR:=$(ROOT_DIR)/inc
 SRCS:=$(wildcard *.c)
 OBJS:=$(subst .c,.o,$(SRC))
 
-
-CFLAGS=-std=c11 -I$(ROOT_DIR) -fno-pic -mcmodel=kernel \
+CFLAGS=-std=c11 -I$(INCLUDE_DIR) -fno-pic -mcmodel=kernel \
 				-fno-stack-protector -fcf-protection=none
 LDFLAGS=-s
 
+# $(LIB_DIR)/io.o
 sys.bin: main.o header64.o 
-	ld  -Ttext=0x100000  -o sys.elf $^
+	ld  -Ttext=0x20000  -o sys.elf $^
 	objcopy -O  binary  sys.elf $@ 
 
 header64.o: header64.asm 
@@ -29,4 +30,4 @@ clean:
 	-rm dis_*.asm dis_*.S
 dump:
 	objdump -d  sys.elf > dis_sys.S
-	ndisasm -o 0x100000 sys.bin > dis_sys.asm
+	ndisasm -o 0x20000 sys.bin > dis_sys.asm

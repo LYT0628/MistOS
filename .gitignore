@@ -68,3 +68,6 @@ dis_*.S
 *.elf
 *.out 
 
+# vhd 等我把动态vhd写入逻辑做完，就可以删掉它的
+tools/vpcvm/orange/*.vhd 
+

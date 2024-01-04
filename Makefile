@@ -2,6 +2,7 @@
 ROOT_DIR:=.
 BOOT_DIR:=$(ROOT_DIR)/boot
 INIT_DIR:=$(ROOT_DIR)/init
+INCLUDE_DIR:=$(ROOT_DIR)/inc
 BUILD_DIR:=$(ROOT_DIR)/build
 TOOLS_DIR:=$(ROOT_DIR)/tools
 PACKAGE=$(ROOT_DIR)/kernel.bin
@@ -30,7 +31,7 @@ BOCHS_IMG_MSR:=$(TOOL_BOCHS)/msr.img
 
 $(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS)
 	cd $(BOOT_DIR)/ && make
-	cd $(INIT_DIR)/ && make 
+	cd $(INIT_DIR)/ && make
 	$(PYTHON) $(BUILD_DIR)/build.py
 
 

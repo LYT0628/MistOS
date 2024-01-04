@@ -17,7 +17,7 @@ clean:
 	-rm -f *.bin *.o
 	-rm -f dis_*.asm
 
-dump: boot16.bin boot32.bin system.bin
+dump: boot16.bin boot32.bin 
 	ndisasm -o 0x7c00 boot16.bin > dis_boot16.asm
 	ndisasm -o 0x10000 boot32.bin > dis_boot32.asm
 

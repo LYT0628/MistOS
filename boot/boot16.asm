@@ -2,7 +2,7 @@
 %include	"pm.inc"	; 常量, 宏
 %include 	"boot.inc"
 
-[SECTION boot16 vstart=7c00h]
+[SECTION .boot16 vstart=7c00h]
 [BITS	16]
 SEG_BOOT16:
 	mov	AX, CS ; cs初始是0
