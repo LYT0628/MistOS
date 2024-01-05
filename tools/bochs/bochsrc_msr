@@ -1,10 +1,10 @@
 # 给虚拟机分配多少内存
-megs: 32
-
+megs: 2048
+cpu: model=corei5_lynnfield_750, count=1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1
 # 设置BIOS镜像
- #romimage: file=$BXSHARE/BIOS-bochs-latest 
+# romimage: file=$BXSHARE/BIOS-bochs-latest 
 # 设置VGA BIOS镜像
- #vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+# vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 
 
 # floppya: 1_44=a.img, status=inserted

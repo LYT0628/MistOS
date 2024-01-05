@@ -5,14 +5,15 @@ INCLUDE_DIR:=$(ROOT_DIR)/inc
 SRCS:=$(wildcard *.c)
 OBJS:=$(subst .c,.o,$(SRC))
 
-CFLAGS=-std=c11 -I$(INCLUDE_DIR) -fno-pic -mcmodel=kernel \
+CFLAGS=-std=c11 -I$(INCLUDE_DIR) \
+				-fno-pic -mcmodel=kernel \
 				-fno-stack-protector -fcf-protection=none
 LDFLAGS=-s
 
 # $(LIB_DIR)/io.o
-sys.bin: main.o header64.o 
+sys.bin: main.o header64.o $(INCLUDE_DIR)/io.o
 	ld  -Ttext=0x20000  -o sys.elf $^
-	objcopy -O  binary  sys.elf $@ 
+	objcopy -O binary  sys.elf $@ 
 
 header64.o: header64.asm 
 	nasm -f elf64 $< -o $@

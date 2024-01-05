@@ -16,6 +16,9 @@ SHELL:=/bin/sh
 
 
 ASMS:=$(wildcard $(BOOT_DIR)/*.asm)
+ASMS+=$(wildcard $(INIT_DIR)/*.asm)
+SRCS:=$(wildcard $(INIT_DIR)/*.c)
+
 VHD=/home/lyt0628/dev/CODE/MistOS/tools/vpcvm/orange/orange.vhd
 # bochs
 TOOL_BOCHS:=$(TOOLS_DIR)/bochs
@@ -29,7 +32,7 @@ BOCHS_IMG_MSR:=$(TOOL_BOCHS)/msr.img
 
 
 
-$(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS)
+$(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS) $(SRCS)
 	cd $(BOOT_DIR)/ && make
 	cd $(INIT_DIR)/ && make
 	$(PYTHON) $(BUILD_DIR)/build.py
@@ -40,6 +43,7 @@ $(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS)
 
 clean:
 	cd $(BOOT_DIR) && make clean
+
 	cd $(INIT_DIR) && make clean
 	-rm -f *.bin *.com  \
 			  *.out *.elf *.o \
