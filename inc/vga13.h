@@ -1,3 +1,5 @@
+#ifndef __VGA13__
+#define __VGA13__
 /**
  * @brief 
  * @param x 
@@ -12,3 +14,9 @@
  * 14-柠檬黄 15-白 
  */
 void drawSq(int x, int y, int width, int height, unsigned char color);
+
+#define SCREEN_SIZE_X  320
+#define SCREEN_SIZE_Y  200
+#define VRAM13 (char *)0xA0000
+
+#endif

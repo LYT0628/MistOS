@@ -1,16 +1,17 @@
-
+#include "vga13.h"
 
 
 void drawSq(int x, int y, int width, int height, unsigned char color){
-  char *vram = (char *)0xA0000;
+  char *vram = VRAM13;
   int x0 = x, y0 = y;
   int x1 = x + width, y1 = y + height;
 
-  for(int i = y0; i<=y1; i++){ // col
-    for(int j= x0; j<= x1; j++){
-      vram[i*320 + j] = color;
+  for(int i = y0; i< y1; i++){ // col
+    for(int j= x0; j< x1; j++){
+      vram[i*SCREEN_SIZE_X + j] = color;
     }
   }
+
 }
 
 // void palette_init(){
