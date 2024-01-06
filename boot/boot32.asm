@@ -24,29 +24,27 @@ PM2_IDENTITY  EQU 0x34000 ; 恒等映射的二级页表
 
   lgdt [GDTR] ;为64位模式准备新的段描述符
 
-  ; call setupPaging   1
-  call SetupPagingTmp ; 没办法了, 现在暂时先使用2级分页吧, 现在bohcs默认用二级分页，等找到办法开启4级分页再切换回来
+  call setupPaging   
+  ; call SetupPagingTmp ; 没办法了, 现在暂时先使用2级分页吧, 现在bohcs默认用二级分页，等找到办法开启4级分页再切换回来
 
 
 ; 使能PAE 2
-  ; mov eax, cr4
-  ; bts eax, 5 
-  ; mov cr4, eax
+  mov eax, cr4
+  bts eax, 5 
+  mov cr4, eax
+
+; 设置cr3指向四级页表(根页表) 3
+  mov eax, PM4
+  mov cr3, eax
 
 
 ; 使能 64位模式
 ; msr EFER
   mov  ecx, 0xC000_0080
   rdmsr
-  or eax, 1000_0000b ; 使能64位模式 
-  or eax, 0000_0001b ; 使能 syscall
+  bts eax, 0x8 ; 使能64位模式 
+  bts eax, 0x0 ; 使能 syscall
   wrmsr 
-
-
-; 设置cr3指向四级页表(根页表) 3
-  ; mov eax, PM4
-  ; mov cr3, eax
-
 
 ; 使能分页..默认就是启动分页的 ？
   mov eax, cr0 
@@ -54,82 +52,99 @@ PM2_IDENTITY  EQU 0x34000 ; 恒等映射的二级页表
   mov cr0, eax 
 
 
-
   ; jmp SELECTOR_SYSTEM: 0x0100000
   jmp SELECTOR_SYSTEM: HEADER64_PHYSICAL_ADDR
 ; 别忘记粒度了，4KB的粒度，段长空间才是4GB
+
 
 ;启动设置页表--------------------------------------------------------------------------
 setupPaging:
 	mov	AX, SELECTOR_DATA ; stosd 指令 EAX -> ES:EDI, edi 会自动增加
 	mov	ES, AX  
+  
 
-	; 初始化4级页表
-  mov	EDI, PM4  ; 目的地址 EDI
-  ; 指向恒等映射的三级页表
-  mov	EAX, PM3_IDENTITY | PG_P | PG_RWW
+; 初始化4级页表 -----------------------------------------------------
+  mov	EDI, PM4  ; 目的地址 EDI  
+  mov	EAX, PM3_IDENTITY | PG_P | PG_RWW ; 指向恒等映射的三级页表
   stosd
-  add EAX, 0x1000 ;  每个表项4K大小 
+  xor EAX, EAX ; 高32位填充0
+  stosd 
 
-; 填充510个空项
-	mov	ECX, 510  
-  xor EAX, EAX
+	mov	ECX, 510  ; 填充510个空项
 pm4_init:
 	stosd ; EAX -> ES:EDI
-	loop	pm4_init
+  stosd ; 高32位也填充0
+  loop	pm4_init
 
-  ; 第 512 项指向，pm3
+
+; 第 512 项指向，pm3
   mov EAX, PM3 | PG_P | PG_RWW
   stosd
-
+  xor EAX, EAX ; 高32位填充0
+  stosd 
+; 4级页表初始化结束--------------------------------------------------
 
 
   ; 初始化3级页表
   ; 填充510个空项
   mov EDI, PM3 
 	mov	ECX, 510  
-  xor eax, eax 
+  xor EAX, EAX
 pm3_init:
 	stosd ; EAX -> ES:EDI
+  stosd 
 	loop	pm3_init
 
   ; 第 511 项指向pm2
   mov EAX, PM2 | PG_P | PG_RWW
   stosd
+  xor EAX, EAX ; 高32位填充0
+  stosd 
+
   ; 第512 项填充 0 
-  mov EAX, 0 
   stosd
+  stosd 
+; 三级页表初始化结束---------------------------------------------
 
   ; 初始化2级页表
   mov EDI, PM2 
-	mov	ECX, 512 
-  mov EAX, PM1 | PG_P | PG_RWW ; 一级页表首地址
+	mov	ECX, 512
+  mov EDX, PM1 | PG_P | PG_RWW ; 一级页表首地址
 pm2_init:
+  mov EAX, EDX
 	stosd ; EAX -> ES:EDI
-  add EAX, 0x1000 ; 指向下一个一级页表项
+  add EDX, 0x1000 ; 指向下一个一级页表项
+  xor EAX, EAX ; 高32位填充0
+  stosd 
 	loop	pm2_init
+; 二级页表初始化结束
 
   ; 初始化1级页表
   mov EDI, PM1 ; 
 	mov	ECX, 32 * 512  ; 先做好前 32 个一级页表， 现在还不知道物理空间到底有多大 
-  mov EAX, 0 | PG_P | PG_RWW ; 指向整个物理地址
+  mov EDX, 0 | PG_P | PG_RWW ; 指向整个物理地址
 pm1_init:
+  mov EAX, EDX
 	stosd ; EAX -> ES:EDI
-  add EAX, 0x1000 ; 指向下一个一级页表项
-	loop	pm1_init
+  add EDX, 0x1000 ; 指向下一个一级页表项
+  xor EAX, EAX ; 高32位填充0
+  stosd 
+  loop	pm1_init
   
   ; 初始化恒等映射三级页表
   mov	EDI, PM3_IDENTITY  ; 目的地址 EDI
   ; 指向恒等映射的二级页表
   mov	EAX, PM2_IDENTITY | PG_P | PG_RWW
   stosd
-  add EAX, 0x1000 ;  每个表项4K大小 
+  xor EAX, EAX ; 高32位填充0
+  stosd 
+  ; add EAX, 0x1000 ;  每个表项4K大小 
 
 ; 填充511个空项
 	mov	ECX, 511
-  xor EAX, EAX
 pm3_identity_init:
 	stosd ; EAX -> ES:EDI
+  stosd 
 	loop	pm3_identity_init
 
 
@@ -138,15 +153,17 @@ pm3_identity_init:
   ; 复用内核映射的第一个一级页表
   mov	EAX, PM1 | PG_P | PG_RWW
   stosd
+  xor EAX, EAX ; 高32位填充0
+  stosd 
   add EAX, 0x1000 ;  每个表项4K大小 
 
 ; 填充511个空项
 	mov	ECX, 511
-  xor EAX, EAX
 pm2_identity_init:
 	stosd ; EAX -> ES:EDI
-	loop	pm2_identity_init
+  stosd 
 
+	loop	pm2_identity_init
 
 	ret
 ;-------------------------------------

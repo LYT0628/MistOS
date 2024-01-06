@@ -1,6 +1,6 @@
 # 给虚拟机分配多少内存
 megs: 2048
-cpu: model=corei5_lynnfield_750, count=1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1
+# cpu: model=corei7_sandy_bridge_2600k, count=1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1
 # 设置BIOS镜像
 # romimage: file=$BXSHARE/BIOS-bochs-latest 
 # 设置VGA BIOS镜像
