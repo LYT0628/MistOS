@@ -12,7 +12,7 @@ LDFLAGS=-s
 
 # $(LIB_DIR)/io.o
 sys.bin: main.o header64.o $(INCLUDE_DIR)/io.o
-	ld  -Ttext=0x40000  -o sys.elf $^
+	ld  -Ttext=0x50000  -o sys.elf $^
 	objcopy -O binary  sys.elf $@ 
 
 header64.o: header64.asm 
@@ -22,13 +22,11 @@ main.o: main.c
 	gcc $(CFLAGS) -c -o $@ $^
 
 
-
-
 .PHONY: clean dump 
 
 clean:
 	-rm *.o *-bin *.elf *.bin 
 	-rm dis_*.asm dis_*.S
-dump:
+dump:  sys.bin
 	objdump -d  sys.elf > dis_sys.S
-	ndisasm -o 0x40000 sys.bin > dis_sys.asm
+	ndisasm -o 0x50000 sys.bin > dis_sys.asm
