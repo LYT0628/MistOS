@@ -152,8 +152,8 @@ boot_msg:
 ;----------------------------------------------------------------------------------------------
 ;                              段基址,       段界限     , 属性
 GDT:	   Descriptor       0,                	 0, 						0           	 ; 空描述符
-DESC_CODE32: Descriptor   0, 				BOOT32_LIMIT, 						DA_C + DA_32	 ; 内核代码段
-DESC_DATA: Descriptor     0,     		BOOT32_LIMIT,   	 				DA_DRW + DA_32 ; 内核数据段
+DESC_CODE32: Descriptor   0, 						0xFFFFF, 						DA_C + DA_32	 ; 内核代码段
+DESC_DATA: Descriptor     0,     				0xFFFFF,   	 				DA_DRW + DA_32 ; 内核数据段
 ; GDT 结束
 
 GDT_LEN		EQU	$ - GDT	; GDT长度

@@ -12,7 +12,7 @@ LDFLAGS=-s
 
 # $(LIB_DIR)/io.o
 sys.bin: main.o header64.o $(INCLUDE_DIR)/io.o
-	ld  -Ttext=0x20000  -o sys.elf $^
+	ld  -Ttext=0x40000  -o sys.elf $^
 	objcopy -O binary  sys.elf $@ 
 
 header64.o: header64.asm 
@@ -31,4 +31,4 @@ clean:
 	-rm dis_*.asm dis_*.S
 dump:
 	objdump -d  sys.elf > dis_sys.S
-	ndisasm -o 0x20000 sys.bin > dis_sys.asm
+	ndisasm -o 0x40000 sys.bin > dis_sys.asm
