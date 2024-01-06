@@ -121,7 +121,7 @@ loop_read_header64:
 switch2GraphMode:
   mov AL, 0x13 ;VGA显卡320x320真彩色
   mov AH, 0x00 
-  int 10
+  int 0x10
 	mov byte [VMODES], 8 
 	mov word [SCRNX], 320
 	mov word [SCRNY], 200

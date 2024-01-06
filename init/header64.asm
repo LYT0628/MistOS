@@ -1,4 +1,4 @@
-
+%include "../boot/boot.inc"
 global _start
 
 extern main 
@@ -7,5 +7,12 @@ extern main
 [BITS 64]
 _start:
 loop_fin:
+  mov ax, SELECTOR_DATA
+  mov ds, ax 
+  mov ss, ax 
+  mov es, ax 
+  mov fs, ax 
+  mov gs, ax 
+  
   push main
   ret   

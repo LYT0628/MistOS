@@ -45,6 +45,12 @@ PM2_IDENTITY  EQU 0x34000 ; 恒等映射的二级页表
   bts eax, 31
   mov cr0, eax 
 
+  mov AX, SELECTOR_DATA
+  mov DS, AX 
+  mov SS, AX 
+  mov ES, AX 
+  mov FS, AX 
+  mov GS, AX 
 
   jmp SELECTOR_SYSTEM: HEADER64_PHYSICAL_ADDR
 ; 别忘记粒度了，4KB的粒度，段长空间才是4GB
@@ -54,7 +60,7 @@ PM2_IDENTITY  EQU 0x34000 ; 恒等映射的二级页表
 setupPaging:
 	mov	AX, SELECTOR_DATA ; stosd 指令 EAX -> ES:EDI, edi 会自动增加
 	mov	ES, AX  
-  
+
 
 ; 初始化4级页表 -----------------------------------------------------
   mov	EDI, PM4  ; 目的地址 EDI  

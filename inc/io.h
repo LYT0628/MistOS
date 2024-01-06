@@ -3,25 +3,15 @@
 
 
 void io_hlt();
-// #define io_hlt() \
-// do {\
-//   __asm__("hlt\n\t" \
-//           "rep"); \
-// }while(0)
-
-
-
-#define write_mem8(addr, data) \
-do{ \
-__asm__("mov %0, %%ECX\n\t" \
-        "mov %1, %%AL \n\t" \
-        "mov %%AL, (%%EAX)\n\t" \
-        "rep"\
-        :\
-        :"m"(addr),"m"(data)\
-        :"ecx","eax"\
-        ); \
-}while(0) 
-
+void io_cli();
+void io_sti();
+void io_stihlt();
+int io_in8(int port);
+int io_in16(int port);
+int io_in32(int port);
+void io_out8(int port, int data);
+void io_out16(int port, int data);
+void io_out32(int port, int data);
+void write_mem8(int addr, int data);
 #endif
 

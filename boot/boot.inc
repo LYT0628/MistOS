@@ -26,7 +26,8 @@ HEADER64_LIMIT_N_SECTOR       EQU 0x2 ; BOOT32 所占磁盘个数(几个512字�
 HEADER64_LOGIC_ADDR           EQU 0x05000 ; header64 初始加载到内存中的逻辑地址
 HEADER64_PHYSICAL_ADDR        EQU 0x50000 ; header64 初始加载到内存中的物理地址
 
-
+SELECTOR_BOOT64 EQU 0x8 
+SELECTOR_DATA   EQU 0x10
 
 ; BOOT_INFO
 CYLS                   EQU 0x8200 ; 设置启动区 

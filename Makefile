@@ -38,7 +38,7 @@ $(PACKAGE):	$(BUILD_DIR)/build.py $(ASMS) $(SRCS)
 	$(PYTHON) $(BUILD_DIR)/build.py
 
 
-.PHONY: clean vhd msr 
+.PHONY: clean vhd msr dump 
 
 # 将系统内核写进VHD硬盘 , 现在还兼容硬盘，不可运行
 vhd:	$(PACKAGE)
@@ -61,5 +61,3 @@ clean:
 	-rm -f *.bin *.com  \
 			  *.out *.elf *.o \
 				*.log
-
-
