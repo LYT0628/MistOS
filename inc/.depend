@@ -1,1 +1,1 @@
-vga13.o: vga13.c vga13.h
+vga.o: vga.c vga.h

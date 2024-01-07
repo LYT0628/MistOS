@@ -12,7 +12,7 @@ CFLAGS=-std=c11 -I$(INCLUDE_DIR) \
 LDFLAGS=-s
 
 # $(LIB_DIR)/io.o
-sys.bin: main.o header64.o $(INCLUDE_DIR)/io.o $(INCLUDE_DIR)/vga13.o
+sys.bin: main.o header64.o $(INCLUDE_DIR)/io.o  $(INCLUDE_DIR)/vga.o
 	ld  -Ttext=0x50000  -o sys.elf $^
 	objcopy -O binary  sys.elf $@ 
 

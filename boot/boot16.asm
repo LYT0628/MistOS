@@ -119,17 +119,18 @@ loop_read_header64:
 ;header64读取结束---------------------------------------------
 ;-------------------------------------------------------------
 switch2GraphMode:
-  mov AL, 0x13 ;VGA显卡320x320真彩色
+  mov AL, 0x13 ;VGA显卡320x320真彩色(色深8)
   mov AH, 0x00 
   int 0x10
-	mov byte [VMODES], 8 
-	mov word [SCRNX], 320
-	mov word [SCRNY], 200
-	mov DWORD [VRAM_GRAPH], 0x000a_0000
+
+	mov byte [VMODES], 8 ;色深
+	mov word [SCRNX], 320 ; u宽度
+	mov word [SCRNY], 200 ;高度
+	mov DWORD [VRAM_GRAPH], 0x000a_0000 ; vram起始地址
 
 	mov AH, 0x02
 	int 0x16
-	mov [LEDS], AL
+	mov [LEDS], AL ; 键盘LED灯信息
 
   ret 
 ;End of Switch2GraphMode----------------------------------------------------------

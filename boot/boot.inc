@@ -32,8 +32,8 @@ SELECTOR_DATA   EQU 0x10
 ; BOOT_INFO
 CYLS                   EQU 0x8200 ; 设置启动区 
 LEDS                   EQU 0x8201 
-VMODES                 EQU 0x8202 ; 关于颜色数目的信息
-SCRNX                  EQU 0x8204 ; 分辨率的x 
+VMODES                 EQU 0x8202 ; 显示模式
+SCRNX                  EQU 0x8204 ; 分辨率的x
 SCRNY                  EQU 0x8206 ; 分辨率的y
 VRAM_GRAPH             EQU 0x8208 ; 图形模式下显存的起始地址
 
