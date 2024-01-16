@@ -1,0 +1,2 @@
+/usr/bin/ar qc libMLibDraw.a CMakeFiles/MLibDraw.dir/draw.c.o
+/usr/bin/ranlib libMLibDraw.a

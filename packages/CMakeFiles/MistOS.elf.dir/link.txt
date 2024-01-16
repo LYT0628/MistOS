@@ -1,0 +1,1 @@
+/usr/bin/cc -std=c11 				-fno-pic -mcmodel=kernel 				-fno-stack-protector -fcf-protection=none 				-nostdinc -fno-builtin -Ttext=0x50000 CMakeFiles/MistOS.elf.dir/init/main.c.o MLibC/CMakeFiles/MLibC.dir/string.c.o MLibDraw/CMakeFiles/MLibDraw.dir/draw.c.o -o MistOS.elf 

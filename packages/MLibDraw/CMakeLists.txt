@@ -1,0 +1,1 @@
+add_library(MLibDraw OBJECT draw.c)

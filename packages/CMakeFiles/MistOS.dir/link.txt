@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/MistOS.dir/init/main.c.o -o MistOS 

@@ -1,0 +1,1 @@
+/usr/bin/cc -std=c11 				-fno-pic -mcmodel=kernel -march=x86-64				-fno-stack-protector -fcf-protection=none 				-nostdinc -fno-builtin -Ttext=0x50000 CMakeFiles/MistOS.bin.dir/init/main.c.o -o MistOS.bin 

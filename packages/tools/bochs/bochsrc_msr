@@ -1,0 +1,27 @@
+# 给虚拟机分配多少内存
+megs: 2048
+# cpu: model=corei7_sandy_bridge_2600k, count=1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1
+# 设置BIOS镜像
+# romimage: file=$BXSHARE/BIOS-bochs-latest 
+# 设置VGA BIOS镜像
+# vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+
+# floppya: 1_44=a.img, status=inserted
+# A盘
+floppya: 1_44=/home/lyt0628/dev/CODE/MistOS/packages/tools/bochs/msr.img, status=inserted
+# 软盘a 驱动
+boot: floppy
+
+# 日志文件i位置
+log:bochsout.log
+# 是否使能鼠标
+mouse: enabled=0
+# 键盘映射文件， 在bochs下载时自带
+# keyboard_mapping: enabled=1, map=/usr/share/bochs/keymaps/x11-pc-us.map
+# keyboard: enabled=1, map=$BXSHARE/keymaps/x11-pc-us.map
+
+
+# clock: syc=realtime, time0=local
+
+# cpuid: model=corei7_sandy_bridge_2600k

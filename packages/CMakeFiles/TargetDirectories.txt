@@ -1,0 +1,9 @@
+/home/lyt0628/dev/CODE/MistOS/packages/CMakeFiles/MistOS.elf.dir
+/home/lyt0628/dev/CODE/MistOS/packages/CMakeFiles/edit_cache.dir
+/home/lyt0628/dev/CODE/MistOS/packages/CMakeFiles/rebuild_cache.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibC/CMakeFiles/MLibC.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibC/CMakeFiles/edit_cache.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibC/CMakeFiles/rebuild_cache.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibDraw/CMakeFiles/MLibDraw.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibDraw/CMakeFiles/edit_cache.dir
+/home/lyt0628/dev/CODE/MistOS/packages/MLibDraw/CMakeFiles/rebuild_cache.dir

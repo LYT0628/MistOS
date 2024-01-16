@@ -1,0 +1,21 @@
+{
+  "cSpell.words": [
+    "AHHA",
+    "binfo",
+    "cyls",
+    "leds",
+    "mcmodel",
+    "mlibc",
+    "nostdinc",
+    "scrnx",
+    "scrny",
+    "stihlt",
+    "Ttext",
+    "vmode",
+    "ysize"
+  ],
+  "files.associations": {
+    "stdint.h": "c",
+    "string.h": "c"
+  }
+}

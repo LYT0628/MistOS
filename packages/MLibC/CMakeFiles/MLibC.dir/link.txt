@@ -1,0 +1,2 @@
+/usr/bin/ar qc libMLibC.a CMakeFiles/MLibC.dir/string.c.o io.o
+/usr/bin/ranlib libMLibC.a
